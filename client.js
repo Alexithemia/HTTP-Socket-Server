@@ -1,4 +1,5 @@
 const net = require('net');
+const fs = require('fs');
 
 const methods = {
   GET: true,
@@ -23,23 +24,33 @@ const err = {
   '505': '[31mThe server does not support the HTTP protocol version used in the request[39m'
 }
 let method = 'GET';
-let url = process.argv[2];
+let url;
 let port = '80';
 let response = '';
 let host;
 let path;
+let save;
 let postMessage;
+let count = 2;
 let headerHash = {};
 
-if (methods[process.argv[3]]) {
-  method = process.argv[3];
+if (process.argv[count] === '-save') {
+  count++;
+  save = process.argv[count];
+  count++;
+  url = process.argv[count];
+  count++;
+} else {
+  url = process.argv[count];
+  count++;
+}
+
+if (methods[process.argv[count]]) {
+  method = process.argv[count];
+  count++;
   if (method === 'POST') {
-    postMessage = process.argv[4]
-  }
-} else if (methods[process.argv[4]]) {
-  method = process.argv[4];
-  if (method === 'POST') {
-    postMessage = process.argv[5]
+    postMessage = process.argv[count];
+    count++
   }
 }
 
@@ -77,6 +88,7 @@ if (!url) {
   } else {
     request += 'Connection: close\n\n';
   }
+
   client.write(request);
 
   client.on('data', function (data) {
@@ -88,7 +100,6 @@ if (!url) {
   });
 
   client.on('end', function () {
-    console.log(response);
 
     if (!(response.slice(0, 4) === 'HTTP')) {
       process.stdout.write('[31mResponse is not valid HTTP[39m');
@@ -99,6 +110,13 @@ if (!url) {
     let status = header.split(' ')[1];
     let body = tempArr[1];
 
+    if (save) {
+      fs.writeFile(save, body, function (err) {
+        if (err) throw err;
+        console.log('Saved!');
+      });
+    }
+
     let headerLines = header.split('\n');
     headerLines.shift()
     headerLines.forEach(line => {
@@ -106,7 +124,7 @@ if (!url) {
       headerHash[headerData[0]] = headerData[1];
     });
 
-    if (process.argv[3] === '-H') {
+    if (process.argv[count] === '-H') {
       process.stdout.write(header);
     } else {
       process.stdout.write(body);
