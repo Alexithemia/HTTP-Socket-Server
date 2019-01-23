@@ -52,7 +52,7 @@ for (let i = 2; i < process.argv.length; i++) {
   }
 }
 
-if (help) {
+if (help || process.argv.length === 2) {
   console.log('List of argument values recognized by client.js');
   for (const key in options) {
     console.log(key + ' - ' + options[key]);
