@@ -7,9 +7,9 @@ function fetchHtmlFiles(filePath) {
 
 const indexHTML = fetchHtmlFiles('./public/index.html');
 const hydrogenHTML = fetchHtmlFiles('./public/hydrogen.html');
-const heliumHTML = fetchHtmlFiles('./public/helium.html').toString();
-const cssStyles = fetchHtmlFiles('./public/css/styles.css').toString();
-const error404 = fetchHtmlFiles('./public/404.html').toString();
+const heliumHTML = fetchHtmlFiles('./public/helium.html');
+const cssStyles = fetchHtmlFiles('./public/css/styles.css');
+const error404 = fetchHtmlFiles('./public/404.html');
 
 const server = net.createServer((socket) => {
   socket.setEncoding('utf8');
