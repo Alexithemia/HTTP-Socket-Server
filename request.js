@@ -36,63 +36,63 @@ function clientRequest(url, method, save, getHeader, postMessage) {
 
   const client = net.connect(port, host, function () {
     console.log('connected to ' + host + ':' + port);
-  });
 
-  let request = method + ' ' + path + ' HTTP/1.1\n';
-  request += 'Date: ' + new Date().toUTCString() + '\n';
-  request += 'Host: ' + host + '\n';
-  request += 'User-Agent: TylerClient\n';
-  if (method === 'POST') {
-    request += 'Content-Length: ' + postMessage.length + '\n';
-    request += 'Connection: close\n\n';
-    request += postMessage
-  } else {
-    request += 'Connection: close\n\n';
-  }
-  client.write(request);
-
-  client.on('data', function (data) {
-    response += data.toString();
-  })
-
-  client.on('error', (error) => {
-    console.log(error);
-  });
-
-  client.on('end', function () {
-    if (!(response.slice(0, 4) === 'HTTP')) {
-      console.log('[31mResponse is not valid HTTP[39m');
-      return;
+    let request = method + ' ' + path + ' HTTP/1.1\n';
+    request += 'Date: ' + new Date().toUTCString() + '\n';
+    request += 'Host: ' + host + '\n';
+    request += 'User-Agent: TylerClient\n';
+    if (method === 'POST') {
+      request += 'Content-Length: ' + postMessage.length + '\n';
+      request += 'Connection: close\n\n';
+      request += postMessage
+    } else {
+      request += 'Connection: close\n\n';
     }
-    let tempArr = response.split('\r\n\r\n');
-    let header = tempArr[0];
-    let status = header.split(' ')[1];
-    let body = tempArr[1];
+    client.write(request);
 
-    if (save) {
-      fs.writeFile("saves/" + save, body, function (error) {
-        if (error) {
-          throw error;
-        }
-        console.log('Saved!');
-      });
-    }
+    client.on('data', function (data) {
+      response += data.toString();
+    })
 
-    let headerLines = header.split('\n');
-    headerLines.shift()
-    headerLines.forEach(line => {
-      let headerData = line.split(': ')
-      headerHash[headerData[0]] = headerData[1];
+    client.on('error', (error) => {
+      console.log(error);
     });
 
-    if (getHeader) {
-      console.log(header);
-    } else {
-      console.log(body);
-      if (err[status]) {
-        console.log('Error ' + status + ' ' + err[status]);
+    client.on('end', function () {
+      if (!(response.slice(0, 4) === 'HTTP')) {
+        console.log('[31mResponse is not valid HTTP[39m');
+        return;
       }
-    }
+      let tempArr = response.split('\r\n\r\n');
+      let header = tempArr[0];
+      let status = header.split(' ')[1];
+      let body = tempArr[1];
+
+      if (save) {
+        fs.writeFile("saves/" + save, body, function (error) {
+          if (error) {
+            throw error;
+          }
+          console.log('Saved!');
+        });
+      }
+
+      let headerLines = header.split('\n');
+      headerLines.shift()
+      headerLines.forEach(line => {
+        let headerData = line.split(': ')
+        headerHash[headerData[0]] = headerData[1];
+      });
+
+      if (getHeader) {
+        console.log(header);
+      } else {
+        console.log(body);
+        if (err[status]) {
+          console.log('Error ' + status + ' ' + err[status]);
+        }
+      }
+    })
   })
 }
 
