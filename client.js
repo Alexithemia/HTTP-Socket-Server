@@ -6,12 +6,7 @@ let method = 'GET';
 let getHeader = false;
 let postMessage;
 const options = {
-  GET: 'Default Method',
-  POST: 'Changes request method to POST',
-  PUT: 'Changes request method to PUT',
-  DELETE: 'Changes request method to DELETE',
-  HEAD: 'Changes request method to HEAD',
-  OPTIONS: 'Changes request method to OPTIONS',
+  '-X': 'changes method, next argument must be POST, PUT, DELETE, HEAD, or OPTIONS. GET is default',
   '-save': 'Saves body of response to file in saves folder, filename may be defined as next argument value, specify extension or will be saved as .txt',
   '-H': 'Sets client to display header of response',
   '-h': 'Requests this help list'
@@ -27,14 +22,20 @@ const methods = {
 
 for (let i = 2; i < process.argv.length; i++) {
   if (options[process.argv[i]]) {
-    if (methods[process.argv[i]]) {
-      method = process.argv[i];
+    if (process.argv[i] === '-X') {
+      if (!methods[process.argv[i + 1]]) {
+        console.log("[31mA request method must follow -X[39m");
+        process.exit(1);
+      }
+      method = process.argv[i + 1];
+      i++;
       if (method === 'POST') {
         if (options[process.argv[i + 1]]) {
           console.log("[31mPlease include a body for your POST request[39m");
           process.exit(1);
         }
         postMessage = process.argv[i + 1];
+        i++;
       }
     } else if (process.argv[i] === '-save') {
       if (options[process.argv[i + 1]]) {
@@ -42,6 +43,7 @@ for (let i = 2; i < process.argv.length; i++) {
         process.exit(1);
       }
       save = process.argv[i + 1];
+      i++;
     } else if (process.argv[i] === '-h') {
       help = true;
     } else if (process.argv[i] === '-H') {
@@ -62,7 +64,11 @@ if (help || process.argv.length === 2) {
 }
 
 if (!url || options[url] || url === postMessage) {
-  console.log("[31mPlease include a url, ex: 'node client.js iwanttogethere.com'[39m");
+  if (method === 'POST') {
+    console.log("[31mYou either did not include a message for the POST request or did not include a url at the end[39m");
+    process.exit(1);
+  }
+  console.log("[31mPlease include a url, ex: 'node client.js iwanttogethere.com,' url must be last[39m");
   process.exit(1);
 }
 
