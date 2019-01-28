@@ -1,16 +1,6 @@
 const net = require('net');
 const fs = require('fs');
 
-function fetchHtmlFiles(filePath) {
-  return fs.readFileSync(filePath);
-}
-
-const indexHTML = fetchHtmlFiles('./public/index.html');
-const hydrogenHTML = fetchHtmlFiles('./public/hydrogen.html');
-const heliumHTML = fetchHtmlFiles('./public/helium.html');
-const cssStyles = fetchHtmlFiles('./public/css/styles.css');
-const error404 = fetchHtmlFiles('./public/404.html');
-
 const server = net.createServer((socket) => {
   socket.setEncoding('utf8');
   socket.on('data', (data) => {
@@ -20,29 +10,45 @@ const server = net.createServer((socket) => {
     const path = requestLine[1];
 
     switch (path) {
+      case '':
       case '/':
       case '/index':
       case '/index.html':
-        writeHeader(socket, '200 OK', 'text/html', indexHTML);
-        socket.end();
+        fs.readFile('./public/index.html', function (e, data) {
+          if (e) { throw e };
+          writeHeader(socket, '200 OK', 'text/html', data.toString())
+          socket.end();
+        });
         break;
       case '/hydrogen':
       case '/hydrogen.html':
-        writeHeader(socket, '200 OK', 'text/html', hydrogenHTML);
-        socket.end();
+        fs.readFile('./public/hydrogen.html', function (e, data) {
+          if (e) { throw e };
+          writeHeader(socket, '200 OK', 'text/html', data.toString());
+          socket.end();
+        });
         break;
       case '/helium':
       case '/helium.html':
-        writeHeader(socket, '200 OK', 'text/html', heliumHTML);
-        socket.end();
+        fs.readFile('./public/helium.html', function (e, data) {
+          if (e) { throw e };
+          writeHeader(socket, '200 OK', 'text/html', data.toString());
+          socket.end();
+        });
         break;
       case '/css/styles.css':
-        writeHeader(socket, '200 OK', 'text/html', cssStyles);
-        socket.end();
+        fs.readFile('./public/css/style.css', function (e, data) {
+          if (e) { throw e };
+          writeHeader(socket, '200 OK', 'text/html', data.toString());
+          socket.end();
+        });
         break;
       default:
-        writeHeader(socket, '404 NOT FOUND', 'text/html', error404);
-        socket.end();
+        fs.readFile('./public/404.html', function (e, data) {
+          if (e) { throw e };
+          writeHeader(socket, '200 OK', 'text/html', data.toString());
+          socket.end();
+        });
         break;
     }
   });
@@ -52,7 +58,6 @@ const server = net.createServer((socket) => {
   });
 
 const writeHeader = (socket, status, fileType, file) => {
-
   let message = 'HTTP/1.1 ' + status + '\n'
   message += 'Server: Tyler\'s Element Server\n';
   message += 'Date: ' + new Date().toUTCString() + '\n';
